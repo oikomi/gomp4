@@ -32,7 +32,6 @@ func main() {
 	fp := mp4.NewMp4FilePro()
 	
 	err := fp.Mp4Open(fs)
-	
 	if err != nil {
 		log.Fatalln(err.Error())
 		return
@@ -42,9 +41,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err.Error())
 		return
-	}	
-	
-	
+	}
+		
 	fs.ParseAtoms(fp)
 	/*
 	size, box, _ := fp.Mp4Read()
@@ -56,6 +54,9 @@ func main() {
 	
 	log.Println(size, box)
 	*/
+	log.Println("------")
+	//fs.Dump()
+	log.Println(fs)
+	log.Println("------")
 	
-
 }

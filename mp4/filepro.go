@@ -50,30 +50,52 @@ func (self * Mp4FilePro) Mp4Open(fs *Mp4FileSpec)  error {
 	return nil
 }
 
-func (self * Mp4FilePro) Mp4Read() (size []byte, box []byte, err error) {
+func (self * Mp4FilePro) Mp4Read(size int64) ([]byte,  error) {
+	buf := make([]byte, size)
+	_, err := self.file.Read(buf)
+
+	if err != nil {
+		log.Fatalln(err.Error())
+		return nil, err
+	}
+
+	return buf, nil
+}
+
+
+func (self * Mp4FilePro) Mp4ReadHeader() ( []byte,  []byte,  error) {
 	buf := make([]byte, 8)
-	_, err = self.r.Read(buf)
+	_, err := self.file.Read(buf)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return nil, nil, err
 	}
 
+
 	return buf[0:4], buf[4:8], nil
 }
 
 
-func (self * Mp4FilePro) Mp4Seek(offset int64)  (err error) {
-	//ret, err = self.file.Seek(offset, whence)
-	//if err != nil {
-	//	log.Fatalln(err.Error())
-	//	return
-	//}
+func (self * Mp4FilePro) Mp4Seek(offset int64, whence int)  (error) {
+	_, err := self.file.Seek(offset, whence)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	//log.Printf("seek to %d\n", ret)
+	/*
+	log.Println(offset)
 	buf := make([]byte, offset)
-	_, err = self.r.Read(buf)
+	n, err := self.r.Read(buf)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return  err
 	}
+	
+	log.Println("seeking :")
+	log.Println(n)
+	*/
 	
 	return nil
 }
