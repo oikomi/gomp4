@@ -38,7 +38,7 @@ func NewMp4FilePro () *Mp4FilePro {
 
 func (self * Mp4FilePro) Mp4Open(fs *Mp4FileSpec)  error {
 	var err error
-	//log.Println(fs.mp4Name)
+
 	self.file, err = os.Open(fs.mp4Name)
 	
 	if err != nil {
