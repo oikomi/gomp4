@@ -17,12 +17,16 @@ package util
 
 import (
 	//"encoding/binary"
+<<<<<<< HEAD
 	"encoding/hex"
+=======
+>>>>>>> aa878f053521b2f018d2f6b17583d681659329f2
 	"fmt"
 	"strconv"
 )
 
 func Bytes2Int(b []byte) int64 {
+<<<<<<< HEAD
 	
 	num := hex.EncodeToString(b)
 	
@@ -37,6 +41,10 @@ func Bytes2Int(b []byte) int64 {
 	var s string
 	for _, num := range b {
 		num = hex.EncodeToString()
+=======
+	var s string
+	for _, num := range b {
+>>>>>>> aa878f053521b2f018d2f6b17583d681659329f2
 		s += fmt.Sprintf("%x", num)
 
 	}
@@ -46,6 +54,7 @@ func Bytes2Int(b []byte) int64 {
 	}
 
 	return i
+<<<<<<< HEAD
 	*/
 }
 
@@ -74,3 +83,6 @@ func ToHex(ten int) (hex []int, length int) {
 
 
 
+=======
+}
+>>>>>>> aa878f053521b2f018d2f6b17583d681659329f2

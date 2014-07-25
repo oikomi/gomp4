@@ -18,8 +18,13 @@ import (
 	"os"
 	"log"
 	//"fmt"
+<<<<<<< HEAD
 	"./mp4"
 	//"./util"
+=======
+	"./file"
+	"./util"
+>>>>>>> aa878f053521b2f018d2f6b17583d681659329f2
 )
 
 func main() {
@@ -37,6 +42,7 @@ func main() {
 		return
 	}
 	
+<<<<<<< HEAD
 	err = fp.Mp4FileStat(fs)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -55,6 +61,15 @@ func main() {
 	
 	log.Println(size, box)
 	*/
+=======
+	size, box, _ := fp.Mp4Read()
+	sizeInt := util.Bytes2Int(size)
+	fp.Mp4Seek(sizeInt)
+	
+	size, box, _ = fp.Mp4Read()
+	
+	log.Println(size, box)
+>>>>>>> aa878f053521b2f018d2f6b17583d681659329f2
 	
 
 }
