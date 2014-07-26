@@ -20,7 +20,8 @@ import (
 	"log"
 	//"fmt"
 	"./mp4"
-	//"./util"
+	"./output"
+	
 )
 
 func main() {
@@ -55,7 +56,7 @@ func main() {
 	log.Println(size, box)
 	*/
 	log.Println("------")
-	//fs.Dump()
+	output.JsonDump(fs)
 	log.Println(fs)
 	log.Println("------")
 	

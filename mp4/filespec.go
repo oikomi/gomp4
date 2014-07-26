@@ -24,9 +24,11 @@ import (
 type ParseAtomFuc func(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error
 
 var (
-	mp4Atoms map[string]ParseAtomFuc
+	trakNum int
 	
+	mp4Atoms map[string]ParseAtomFuc
 	mp4MoovAtoms map[string]ParseAtomFuc
+	mp4TrakAtoms map[string]ParseAtomFuc
 )
 
 func init() {
@@ -38,6 +40,10 @@ func init() {
 	mp4MoovAtoms = map[string]ParseAtomFuc {
 		"mvhd": mvhdRead,
 		"trak": trakRead,
+	}
+	mp4TrakAtoms = map[string]ParseAtomFuc {
+		"tkhd": tkhdRead,
+		"mdia": mdiaRead,
 	}
 }
 
@@ -116,6 +122,7 @@ type MoovAtom struct {
 	size int64
 	isFullBox bool
 	mvhdAtom MvhdAtom
+	trakAtom [2]TrakAtom
 }
 
 func moovRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
@@ -149,7 +156,7 @@ func moovRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	for fs.moovAtom.size > pos {
 		size, atom, err := fp.Mp4ReadHeader()
 		
-		log.Println(size, string(atom))
+		//log.Println(size, string(atom))
 		
 		if err != nil {
 			log.Fatalln(err.Error())
@@ -162,6 +169,11 @@ func moovRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	
 		if f, ok := mp4MoovAtoms[string(atom)]; ok {
 			err = f(fs, fp, pos + 8 + offset - sizeInt)
+			
+			if string(atom) == "trak" {
+				trakNum ++
+			}
+			
 			if err != nil {
 				log.Fatalln(err.Error())
 				return err	
@@ -180,9 +192,27 @@ type MdatAtom struct {
 }
 
 func mdatRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
+	log.Println("mdatRead")
+	fs.mdatAtom.offset = offset
+	var err error	
+
+	err = fp.Mp4Seek(offset, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	size, _, err := fp.Mp4ReadHeader()
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	sizeInt := util.Bytes2Int(size)	
+	fs.mdatAtom.size = sizeInt
+	
 	return nil
 }
-////////////
 
 type MvhdAtom struct {
 	offset int64
@@ -260,7 +290,76 @@ func mvhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	return nil
 }
 
+type TrakAtom struct {
+	offset int64
+	size int64
+	isFullBox bool
+}
+
 func trakRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
+	log.Println("trakRead")
+	var err error	
+	fs.moovAtom.trakAtom[trakNum].offset = offset
+
+	err = fp.Mp4Seek(offset, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	size, _, err := fp.Mp4ReadHeader()
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	sizeInt := util.Bytes2Int(size)	
+	fs.moovAtom.trakAtom[trakNum].size = sizeInt
+	
+	var pos int64
+	
+	err = fp.Mp4Seek(8 + offset, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	for fs.moovAtom.trakAtom[trakNum].size > pos {
+		size, atom, err := fp.Mp4ReadHeader()
+		
+		log.Println(size, string(atom))
+		
+		if err != nil {
+			log.Fatalln(err.Error())
+			return err
+		}
+		
+		sizeInt := util.Bytes2Int(size)	
+
+		pos += sizeInt
+	
+		if f, ok := mp4TrakAtoms[string(atom)]; ok {
+			err = f(fs, fp, pos + 8 + offset - sizeInt)
+			if err != nil {
+				log.Fatalln(err.Error())
+				return err	
+			}
+		}
+		
+		fs.nextAtom(pos + 8 + offset, fp)	
+	}
+	
+	return nil
+}
+
+
+func tkhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
+	log.Println("tkhdRead")
+	return nil
+}
+
+func mdiaRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
+	log.Println("mdiaRead")
 	return nil
 }
 
@@ -270,7 +369,6 @@ type Mp4FileSpec struct {
 	ftypAtom FtypAtom
 	moovAtom MoovAtom
 	mdatAtom MdatAtom
-	
 }
 
 func NewMp4FileSpec (name string) *Mp4FileSpec {
@@ -289,7 +387,6 @@ func (self * Mp4FileSpec) nextAtom(offset int64, fp *Mp4FilePro)  error {
 	
 	return err
 }
-
 
 func (self *Mp4FileSpec) ParseAtoms(fp *Mp4FilePro) error {
 	var pos int64
@@ -320,9 +417,4 @@ func (self *Mp4FileSpec) ParseAtoms(fp *Mp4FilePro) error {
 	}
 	
 	return nil
-}
-
-func (self *Mp4FileSpec) Dump()  {
-	log.Println(self.mp4Name)	
-	
 }
