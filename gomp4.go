@@ -75,16 +75,6 @@ func main() {
 	}
 		
 	fs.ParseAtoms(fp)
-	/*
-	size, box, _ := fp.Mp4Read()
-	log.Println(size, box)
-	sizeInt := util.Bytes2Int(size)
-	fp.Mp4Seek(sizeInt - (int64)(len(size)) - (int64)(len(box)))
-	
-	size, box, _ = fp.Mp4Read()
-	
-	log.Println(size, box)
-	*/
 	res, _ := json.Marshal(fs)
 	log.Println(string(res))
 }

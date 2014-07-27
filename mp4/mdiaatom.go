@@ -25,7 +25,9 @@ type MdiaAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
-	
+	MdhdAtomInstance MdhdAtom
+	HdlrAtomInstance HdlrAtom
+	MinfAtomInstance MinfAtom
 }
 
 func mdiaRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
