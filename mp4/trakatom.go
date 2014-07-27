@@ -25,6 +25,7 @@ type TrakAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
+	TkhdAtomInstance TkhdAtom
 }
 
 func trakRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {

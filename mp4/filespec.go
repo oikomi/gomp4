@@ -47,10 +47,6 @@ func init() {
 	}
 }
 
-func tkhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
-	log.Println("tkhdRead")
-	return nil
-}
 
 func mdiaRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	log.Println("mdiaRead")
