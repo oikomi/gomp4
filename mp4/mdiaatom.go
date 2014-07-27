@@ -21,18 +21,17 @@ import (
 	"../util"
 )
 
-type MoovAtom struct {
+type MdiaAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
-	MvhdAtomInstance MvhdAtom
-	TrakAtomInstance [2]TrakAtom
+	
 }
 
-func moovRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
+func mdiaRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	var err error
-	fs.MoovAtomInstance.Offset = offset
-
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.Offset = offset
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.IsFullBox = false
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -46,7 +45,7 @@ func moovRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	}
 	
 	sizeInt := util.Bytes2Int(size)	
-	fs.MoovAtomInstance.Size = sizeInt
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.Size = sizeInt
 	
 	var pos int64
 	
@@ -56,7 +55,7 @@ func moovRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		return err
 	}
 	
-	for fs.MoovAtomInstance.Size > pos {
+	for fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.Size > pos {
 		size, atom, err := fp.Mp4ReadHeader()
 		
 		//log.Println(size, string(atom))
@@ -70,7 +69,7 @@ func moovRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 
 		pos += sizeInt
 	
-		if f, ok := mp4MoovAtoms[string(atom)]; ok {
+		if f, ok := mp4MdiaAtoms[string(atom)]; ok {
 			err = f(fs, fp, pos + 8 + offset - sizeInt)
 			
 			if string(atom) == "trak" {
@@ -83,8 +82,9 @@ func moovRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 			}
 		}
 		
-		fs.nextAtom(pos + 8 + offset, fp)	
+		fs.nextAtom(pos + 8 + offset, fp)
 	}
+	
 	
 	return nil
 }

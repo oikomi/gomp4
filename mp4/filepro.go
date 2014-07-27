@@ -25,7 +25,6 @@ import (
 type Mp4FilePro struct {
 	file *os.File
 	r *bufio.Reader
-	
 }
 
 func NewMp4FilePro () *Mp4FilePro {

@@ -56,11 +56,6 @@ func main() {
 	
 	log.Println(size, box)
 	*/
-	log.Println("------")
-	//output.JsonDump(json.Marshal(fs))
-	log.Println(fs)
 	res, _ := json.Marshal(fs)
 	log.Println(string(res))
-	log.Println("------")
-	
 }

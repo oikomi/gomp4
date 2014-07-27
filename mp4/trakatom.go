@@ -26,10 +26,10 @@ type TrakAtom struct {
 	Size int64
 	IsFullBox bool
 	TkhdAtomInstance TkhdAtom
+	MdiaAtomInstance MdiaAtom
 }
 
 func trakRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
-	log.Println("trakRead")
 	var err error	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].Offset = offset
 

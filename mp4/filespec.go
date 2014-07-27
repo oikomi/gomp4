@@ -29,28 +29,28 @@ var (
 	mp4Atoms map[string]ParseAtomFuc
 	mp4MoovAtoms map[string]ParseAtomFuc
 	mp4TrakAtoms map[string]ParseAtomFuc
+	mp4MdiaAtoms map[string]ParseAtomFuc
 )
 
 func init() {
 	mp4Atoms = map[string]ParseAtomFuc {
-		"ftyp": ftypRead,
-		"moov": moovRead,
-		"mdat": mdatRead,
+		"ftyp" : ftypRead,
+		"moov" : moovRead,
+		"mdat" : mdatRead,
 	}
 	mp4MoovAtoms = map[string]ParseAtomFuc {
-		"mvhd": mvhdRead,
-		"trak": trakRead,
+		"mvhd" : mvhdRead,
+		"trak" : trakRead,
 	}
 	mp4TrakAtoms = map[string]ParseAtomFuc {
-		"tkhd": tkhdRead,
-		"mdia": mdiaRead,
+		"tkhd" : tkhdRead,
+		"mdia" : mdiaRead,
 	}
-}
-
-
-func mdiaRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
-	log.Println("mdiaRead")
-	return nil
+	mp4MdiaAtoms = map[string]ParseAtomFuc {
+		"mdhd" : mdhdRead,
+		"hdlr" : hdlrRead,
+		"minf" : minfRead,
+	}
 }
 
 type Mp4FileSpec struct {
