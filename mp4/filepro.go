@@ -109,6 +109,7 @@ func (self * Mp4FilePro) Mp4FileStat(fs *Mp4FileSpec) error {
 		return  err
 	}
 	
+	fs.Mp4Name = fi.Name()
 	fs.TotalSize = fi.Size()
 	
 	return nil
