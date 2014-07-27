@@ -39,7 +39,7 @@ func NewMp4FilePro () *Mp4FilePro {
 func (self * Mp4FilePro) Mp4Open(fs *Mp4FileSpec)  error {
 	var err error
 
-	self.file, err = os.Open(fs.mp4Name)
+	self.file, err = os.Open(fs.Mp4Name)
 	
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -109,7 +109,7 @@ func (self * Mp4FilePro) Mp4FileStat(fs *Mp4FileSpec) error {
 		return  err
 	}
 	
-	fs.end = fi.Size()
+	fs.TotalSize = fi.Size()
 	
 	return nil
 }

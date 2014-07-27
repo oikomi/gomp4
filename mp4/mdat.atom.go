@@ -13,54 +13,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package mp4
 
 import (
-	"os"
 	"log"
-	"encoding/json"
-	//"fmt"
-	"./mp4"
-	//"./output"
-	
+	//"errors"
+	"../util"
 )
 
-func main() {
-	if len(os.Args) != 2 {
-		os.Exit(0)
-	}	
-	
-	fs := mp4.NewMp4FileSpec(os.Args[1])
-	fp := mp4.NewMp4FilePro()
-	
-	err := fp.Mp4Open(fs)
+type MdatAtom struct {
+	Offset int64
+	Size int64
+}
+
+func mdatRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
+	log.Println("mdatRead")
+	fs.MdatAtomInstance.Offset = offset
+	var err error	
+
+	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
 		log.Fatalln(err.Error())
-		return
+		return err
 	}
 	
-	err = fp.Mp4FileStat(fs)
+	size, _, err := fp.Mp4ReadHeader()
 	if err != nil {
 		log.Fatalln(err.Error())
-		return
+		return err
 	}
-		
-	fs.ParseAtoms(fp)
-	/*
-	size, box, _ := fp.Mp4Read()
-	log.Println(size, box)
-	sizeInt := util.Bytes2Int(size)
-	fp.Mp4Seek(sizeInt - (int64)(len(size)) - (int64)(len(box)))
 	
-	size, box, _ = fp.Mp4Read()
+	sizeInt := util.Bytes2Int(size)	
+	fs.MdatAtomInstance.Size = sizeInt
 	
-	log.Println(size, box)
-	*/
-	log.Println("------")
-	//output.JsonDump(json.Marshal(fs))
-	log.Println(fs)
-	res, _ := json.Marshal(fs)
-	log.Println(string(res))
-	log.Println("------")
-	
+	return nil
 }
