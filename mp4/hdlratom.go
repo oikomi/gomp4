@@ -18,18 +18,73 @@ package mp4
 import (
 	"log"
 	//"errors"
-	//"../util"
+	"../util"
 )
-
 
 type HdlrAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
-	
+	Version int64
+	Flag int64
+	ComponentType int64
+	ComponentSubType int64
+	ComponentManufacturer int64
 }
 
 func hdlrRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
-	log.Println("hdlrRead")
+	var err error
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.Offset = offset
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.IsFullBox = false
+	err = fp.Mp4Seek(offset, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	size, _, err := fp.Mp4ReadHeader()
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	sizeInt := util.Bytes2Int(size)	
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.Size = sizeInt
+	
+	size, err = fp.Mp4Read(1)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.Version = util.Bytes2Int(size)
+	
+	size, err = fp.Mp4Read(3)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.Flag = util.Bytes2Int(size)
+	
+	size, err = fp.Mp4Read(4)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.ComponentType = util.Bytes2Int(size)
+	
+	size, err = fp.Mp4Read(4)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.ComponentSubType = util.Bytes2Int(size)
+	
+	size, err = fp.Mp4Read(4)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.ComponentManufacturer = util.Bytes2Int(size)
+	
 	return nil
 }
