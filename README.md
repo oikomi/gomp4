@@ -8,6 +8,11 @@ Status
 
 It is *not* usable yet and still under early development.
 
+Output
+======
+A json-format output
+
+
 ![](JSONoutput.png)
 
 Copyright & License
