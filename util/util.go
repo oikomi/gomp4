@@ -18,7 +18,7 @@ package util
 import (
 	//"encoding/binary"
 	"encoding/hex"
-	"fmt"
+	//"fmt"
 	"strconv"
 )
 
@@ -30,7 +30,7 @@ func Bytes2Int(b []byte) int64 {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(i)
+	//fmt.Println(i)
 
 	return i
 	/*

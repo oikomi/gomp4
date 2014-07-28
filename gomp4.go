@@ -18,21 +18,51 @@ package main
 import (
 	"os"
 	"log"
-	//"fmt"
+	"encoding/json"
+	"fmt"
 	"./mp4"
-	//"./util"
+	//"./output"
+	
 )
 
+/*
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+const char* build_time(void) {
+	static const char* psz_build_time = "["__DATE__ " " __TIME__ "]";
+	return psz_build_time;
+}
+*/
+import "C"
+
+var (
+	buildTime = C.GoString(C.build_time())
+)
+
+func BuildTime() string {
+	return buildTime
+}
+
+const VERSION string = "0.10"
+
+func version() {
+	fmt.Printf("gomp4 version %s Copyright (c) 2014 Harold Miao (miaohonghit@gmail.com)  \n", VERSION)
+}
+
 func main() {
+	version()
+	fmt.Printf("built on %s\n", BuildTime())
+	
 	if len(os.Args) != 2 {
 		os.Exit(0)
-	}	
+	}
 	
 	fs := mp4.NewMp4FileSpec(os.Args[1])
 	fp := mp4.NewMp4FilePro()
 	
 	err := fp.Mp4Open(fs)
-	
 	if err != nil {
 		log.Fatalln(err.Error())
 		return
@@ -42,20 +72,9 @@ func main() {
 	if err != nil {
 		log.Fatalln(err.Error())
 		return
-	}	
-	
-	
+	}
+		
 	fs.ParseAtoms(fp)
-	/*
-	size, box, _ := fp.Mp4Read()
-	log.Println(size, box)
-	sizeInt := util.Bytes2Int(size)
-	fp.Mp4Seek(sizeInt - (int64)(len(size)) - (int64)(len(box)))
-	
-	size, box, _ = fp.Mp4Read()
-	
-	log.Println(size, box)
-	*/
-	
-
+	res, _ := json.Marshal(fs)
+	log.Println(string(res))
 }

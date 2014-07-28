@@ -21,81 +21,68 @@ import (
 	"../util"
 )
 
-type ParseAtomFuc func(fs *Mp4FileSpec)
+type ParseAtomFuc func(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error
 
 var (
-	mp4Atoms map[string]ParseAtomFuc
+	trakNum int
 	
+	mp4Atoms map[string]ParseAtomFuc
 	mp4MoovAtoms map[string]ParseAtomFuc
+	mp4TrakAtoms map[string]ParseAtomFuc
+	mp4MdiaAtoms map[string]ParseAtomFuc
 )
 
 func init() {
 	mp4Atoms = map[string]ParseAtomFuc {
-		"ftyp": ftypRead,
-		"moov": moovRead,
-		"mdat": mdatRead,
+		"ftyp" : ftypRead,
+		"moov" : moovRead,
+		"mdat" : mdatRead,
 	}
 	mp4MoovAtoms = map[string]ParseAtomFuc {
-		"mvhd": mvhdRead,
-		"trak": trakRead,
+		"mvhd" : mvhdRead,
+		"trak" : trakRead,
 	}
-}
-
-////////////////
-func ftypRead(fs *Mp4FileSpec) {
-	log.Println("--------")
-}
-
-func moovRead(fs *Mp4FileSpec) {
-	log.Println("--------")
-}
-
-func mdatRead(fs *Mp4FileSpec) {
-	log.Println("--------")
-}
-////////////
-
-func mvhdRead(fs *Mp4FileSpec) {
-	log.Println("--------")
-}
-
-func trakRead(fs *Mp4FileSpec) {
-	log.Println("--------")
+	mp4TrakAtoms = map[string]ParseAtomFuc {
+		"tkhd" : tkhdRead,
+		"mdia" : mdiaRead,
+	}
+	mp4MdiaAtoms = map[string]ParseAtomFuc {
+		"mdhd" : mdhdRead,
+		"hdlr" : hdlrRead,
+		"minf" : minfRead,
+	}
 }
 
 type Mp4FileSpec struct {
-	mp4Name string
-	
-	end int64
-	
+	Mp4Name string
+	TotalSize int64
+	FtypAtomInstance FtypAtom
+	MoovAtomInstance MoovAtom
+	MdatAtomInstance MdatAtom
 }
 
 func NewMp4FileSpec (name string) *Mp4FileSpec {
 	fs := &Mp4FileSpec {
-		mp4Name : name,
+		Mp4Name : name,
+		TotalSize : 0,
+		//ftypAtom : new(FtypAtom),
+		//moovAtom : new(MoovAtom),
 	}
 	
 	return fs
 }
 
-
-
-
-func (self * Mp4FileSpec) NextAtom(offset int64, fp *Mp4FilePro)  error {
-	err := fp.Mp4Seek(offset)
+func (self * Mp4FileSpec) nextAtom(offset int64, fp *Mp4FilePro)  error {
+	err := fp.Mp4Seek(offset, 0)
 	
 	return err
 }
 
-
 func (self *Mp4FileSpec) ParseAtoms(fp *Mp4FilePro) error {
 	var pos int64
 	
-	log.Println(self.end)
-	
-	for self.end >= pos {
-		
-		size, atom, err := fp.Mp4Read()
+	for self.TotalSize > pos {
+		size, atom, err := fp.Mp4ReadHeader()
 		
 		log.Println(size, string(atom))
 		
@@ -104,19 +91,19 @@ func (self *Mp4FileSpec) ParseAtoms(fp *Mp4FilePro) error {
 			return err
 		}
 		
-		sizeInt := util.Bytes2Int(size)
-		
-		offset := sizeInt - (int64)(len(size)) - (int64)(len(atom))
-		
-		log.Println(offset)
-		
+		sizeInt := util.Bytes2Int(size)	
+		//offset := sizeInt - (int64)(len(size)) - (int64)(len(atom))
+		//log.Println(offset)
 		pos += sizeInt
 		
 		if f, ok := mp4Atoms[string(atom)]; ok {
-			f(self)
+			err = f(self, fp, pos - sizeInt)
+			if err != nil {
+				log.Fatalln(err.Error())
+				return err	
+			}
 		}
-		
-		self.NextAtom(offset, fp)	
+		self.nextAtom(pos, fp)	
 	}
 	
 	return nil
