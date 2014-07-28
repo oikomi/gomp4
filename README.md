@@ -8,7 +8,7 @@ Status
 
 It is *not* usable yet and still under early development.
 
-[![JSONoutput.png][4]][3]
+![](JSONoutput.jpg)
 
 Copyright & License
 ===================
