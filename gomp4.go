@@ -20,9 +20,7 @@ import (
 	"log"
 	"encoding/json"
 	"fmt"
-	"./mp4"
-	//"./output"
-	
+	"github/oikomi/mp4"
 )
 
 /*

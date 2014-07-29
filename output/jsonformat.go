@@ -2,7 +2,7 @@ package output
 
 import(
 	//"log"
-	"../mp4"
+	"github/oikomi/mp4"
 )
 
 func JsonDump(fs *mp4.Mp4FileSpec)  {

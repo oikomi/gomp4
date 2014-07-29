@@ -18,7 +18,7 @@ package mp4
 import (
 	"log"
 	//"errors"
-	"../util"
+	"github/oikomi/util"
 )
 
 type ParseAtomFuc func(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error

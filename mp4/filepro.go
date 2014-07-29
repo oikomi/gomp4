@@ -19,7 +19,7 @@ import (
 	"os"
 	"log"
 	"bufio"
-	//"../util"
+	//"github/oikomi/util"
 )
 
 type Mp4FilePro struct {
