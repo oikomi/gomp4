@@ -1,6 +1,6 @@
 # gomp4
 
-a lib for mp4 writen in golang
+a lib for mp4 parse writen in golang
 
 
 Status
