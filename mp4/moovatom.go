@@ -18,7 +18,7 @@ package mp4
 import (
 	"log"
 	//"errors"
-	"github/oikomi/util"
+	"github.com/oikomi/gomp4/util"
 )
 
 type MoovAtom struct {
