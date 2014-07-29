@@ -8,6 +8,18 @@ Status
 
 It is *not* usable yet and still under early development.
 
+
+Build and Install
+=====
+    First you should config your golang environment
+	
+	go get github.com/oikomi/gomp4
+    make
+	
+Use
+=====
+	gomp4 mp4filename
+
 Output
 ======
 A json-format output
