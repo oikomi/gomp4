@@ -25,9 +25,10 @@ type FtypAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
-	MajorBrand string
-	MinorVersion int64
+	MajorBrand []byte
+	MinorVersion uint32
 	CompatibleBrands string
+	AllBytes []byte
 }
 
 func ftypRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
@@ -47,6 +48,20 @@ func ftypRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	sizeInt := util.Bytes2Int(size)	
 	fs.FtypAtomInstance.Size = sizeInt
 	
+	err = fp.Mp4Seek(offset, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	buf, err := fp.Mp4Read(fs.FtypAtomInstance.Size)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	fs.FtypAtomInstance.AllBytes = buf
+	
 	fs.FtypAtomInstance.Offset = offset
 	fs.FtypAtomInstance.IsFullBox = false
 	err = fp.Mp4Seek(offset + 8, 0)
@@ -55,12 +70,15 @@ func ftypRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		return err
 	}
 
-	buf, err := fp.Mp4Read(4)
+	buf, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.FtypAtomInstance.MajorBrand = string(buf)
+	//fs.FtypAtomInstance.MajorBrand = string(buf)
+	fs.FtypAtomInstance.MajorBrand = buf
+	
+	log.Println(fs.FtypAtomInstance.MajorBrand)
 	
 	err = fp.Mp4Seek(12, 0)
 	if err != nil {
@@ -73,7 +91,7 @@ func ftypRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.FtypAtomInstance.MinorVersion = util.Bytes2Int(buf)
+	fs.FtypAtomInstance.MinorVersion = util.Byte42Uint32(buf, 0)
 	
 	err = fp.Mp4Seek(16, 0)
 	if err != nil {

@@ -13,11 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package mp4
 
+import (
+	"log"
+)
 
-func Set4Bytes(b []byte) {
-	
-	
+type SegMp4Header struct {
+	Ftyp []byte
+	Moov []byte
+}
+
+func (self * SegMp4Header) FtypCover(fs *Mp4FileSpec)   {
+	self.Ftyp = fs.FtypAtomInstance.AllBytes
+	log.Println(self.Ftyp)
+}
+
+type SegMp4Data struct {
 	
 }
+
