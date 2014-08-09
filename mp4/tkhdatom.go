@@ -25,21 +25,22 @@ type TkhdAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
-	Version int64
-	Flag int64
-	CreationTime int64
-	ModificationTime int64
-	TrakID int64
-	Reserved1 int64
-	Duration int64
-	Reserved2 int64
-	Layer int64
+	Version uint8
+	Flag uint32
+	CreationTime uint32
+	ModificationTime uint32
+	TrakID uint32
+	Reserved1 uint32
+	Duration uint32
+	Reserved2 uint64
+	Layer uint16
 	AlternateGroup int64
-	Volume int64
-	Reserved3 int64
+	Volume uint16
+	Reserved3 uint16
 	MatrixStructure []byte
-	TrackWidth int64
-	TrackHeight int64
+	TrackWidth uint32
+	TrackHeight uint32
+	AllBytes []byte
 }
 
 func tkhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
@@ -61,68 +62,82 @@ func tkhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	sizeInt := util.Bytes2Int(size)	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Size = sizeInt
 	
+	err = fp.Mp4Seek(offset, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	buf, err := fp.Mp4Read(fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Size)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.AllBytes = buf
+	
 	size, err = fp.Mp4Read(1)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Version = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Version = uint8(size[0])
 	
 	size, err = fp.Mp4Read(3)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Flag = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Flag = util.Byte32Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.CreationTime = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.CreationTime = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.ModificationTime = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.ModificationTime = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrakID = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrakID = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved1 = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved1 = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Duration = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Duration = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(8)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved2 = util.Bytes2Int(size)
+	//fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved2 = util.Byte82Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(2)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Layer = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Layer = util.Byte22Uint16(size, 0)
 	
 	size, err = fp.Mp4Read(2)
 	if err != nil {
@@ -136,14 +151,14 @@ func tkhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Volume = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Volume = util.Byte22Uint16(size, 0)
 	
-	size, err = fp.Mp4Read(8)
+	size, err = fp.Mp4Read(2)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved3 = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved3 = util.Byte22Uint16(size, 0)
 	
 	size, err = fp.Mp4Read(36)
 	if err != nil {
@@ -157,14 +172,14 @@ func tkhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrackWidth = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrackWidth = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrackHeight = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrackHeight = util.Byte42Uint32(size, 0)
 	
 	return nil
 }

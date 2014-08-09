@@ -30,6 +30,8 @@ var (
 	mp4MoovAtoms map[string]ParseAtomFuc
 	mp4TrakAtoms map[string]ParseAtomFuc
 	mp4MdiaAtoms map[string]ParseAtomFuc
+	mp4MinfAtoms map[string]ParseAtomFuc
+	mp4StblAtoms map[string]ParseAtomFuc
 )
 
 func init() {
@@ -50,6 +52,19 @@ func init() {
 		"mdhd" : mdhdRead,
 		"hdlr" : hdlrRead,
 		"minf" : minfRead,
+	}
+	mp4MinfAtoms = map[string]ParseAtomFuc {
+		"smhd" : smhdRead,
+		"dinf" : dinfRead,
+		"stbl" : stblRead,
+	}
+	mp4StblAtoms = map[string]ParseAtomFuc {
+		"stsd" : stsdRead,
+		"stts" : sttsRead,
+		"stss" : stssRead,
+		"stsc" : stscRead,
+		"stsz" : stszRead,
+		"stco" : stcoRead,	
 	}
 }
 

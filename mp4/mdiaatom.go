@@ -28,6 +28,7 @@ type MdiaAtom struct {
 	MdhdAtomInstance MdhdAtom
 	HdlrAtomInstance HdlrAtom
 	MinfAtomInstance MinfAtom
+	AllBytes []byte
 }
 
 func mdiaRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
@@ -48,6 +49,20 @@ func mdiaRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	
 	sizeInt := util.Bytes2Int(size)	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.Size = sizeInt
+	
+	err = fp.Mp4Seek(offset, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	buf, err := fp.Mp4Read(8)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.AllBytes = buf
 	
 	var pos int64
 	

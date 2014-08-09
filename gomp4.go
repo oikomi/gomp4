@@ -75,4 +75,5 @@ func main() {
 	fs.ParseAtoms(fp)
 	res, _ := json.Marshal(fs)
 	log.Println(string(res))
+	mp4.WriteSegMp4(fs)
 }

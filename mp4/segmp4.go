@@ -17,6 +17,7 @@ package mp4
 
 import (
 	"log"
+	"os"
 )
 
 type SegMp4Header struct {
@@ -27,6 +28,26 @@ type SegMp4Header struct {
 func (self * SegMp4Header) FtypCover(fs *Mp4FileSpec)   {
 	self.Ftyp = fs.FtypAtomInstance.AllBytes
 	log.Println(self.Ftyp)
+}
+
+func (self * SegMp4Header) MoovCover(fs *Mp4FileSpec)   {
+	self.Moov = fs.MoovAtomInstance.AllBytes
+	log.Println(self.Moov)
+}
+
+func WriteSegMp4(fs *Mp4FileSpec) error {
+	segMp4File := "seg.mp4"
+    fout, err := os.Create(segMp4File)
+	defer fout.Close()
+    if err != nil {
+        log.Fatalln(err.Error())
+        return err 
+    }
+	fout.Write(fs.FtypAtomInstance.AllBytes)
+	fout.Write(fs.MoovAtomInstance.AllBytes)
+	
+	return nil
+
 }
 
 type SegMp4Data struct {

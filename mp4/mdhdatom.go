@@ -26,14 +26,15 @@ type MdhdAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
-	Version int64
-	Flag int64
-	CreationTime int64
-	ModificationTime int64
-	Timescale int64
-	Duration int64
-	Language int64
-	Quality int64
+	Version uint8
+	Flag uint32
+	CreationTime uint32
+	ModificationTime uint32
+	Timescale uint32
+	Duration uint32
+	Language uint16
+	//Quality uint32
+	AllBytes []byte
 }
 
 func mdhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
@@ -55,61 +56,77 @@ func mdhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	sizeInt := util.Bytes2Int(size)	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Size = sizeInt
 	
+	err = fp.Mp4Seek(offset, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	buf, err := fp.Mp4Read(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Size)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.AllBytes = buf
+	
 	size, err = fp.Mp4Read(1)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Version = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Version = uint8(size[0])
 	
 	size, err = fp.Mp4Read(3)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Flag = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Flag = util.Byte32Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.CreationTime = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.CreationTime = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.ModificationTime = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.ModificationTime = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Timescale = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Timescale = util.Byte42Uint32(size, 0)
 
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Duration = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Duration = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(2)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Language = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Language = util.Byte22Uint16(size, 0)
 	
+	/*
 	size, err = fp.Mp4Read(2)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.Quality = util.Bytes2Int(size)
+	*/
 	
 	return nil
 }

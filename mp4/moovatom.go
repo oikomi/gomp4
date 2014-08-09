@@ -27,6 +27,7 @@ type MoovAtom struct {
 	IsFullBox bool
 	MvhdAtomInstance MvhdAtom
 	TrakAtomInstance [2]TrakAtom
+	AllBytes []byte
 }
 
 func moovRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
@@ -47,6 +48,20 @@ func moovRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	
 	sizeInt := util.Bytes2Int(size)	
 	fs.MoovAtomInstance.Size = sizeInt
+	
+	err = fp.Mp4Seek(offset, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	buf, err := fp.Mp4Read(8)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	fs.MoovAtomInstance.AllBytes = buf
 	
 	var pos int64
 	

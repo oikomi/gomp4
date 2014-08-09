@@ -21,19 +21,23 @@ import (
 	"github.com/oikomi/gomp4/util"
 )
 
-type TrakAtom struct {
+type SmhdAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
-	TkhdAtomInstance TkhdAtom
-	MdiaAtomInstance MdiaAtom
+	
+	Version uint8
+	Flag uint32
+
 	AllBytes []byte
 }
 
-func trakRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
-	var err error	
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].Offset = offset
-
+func smhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
+	var err error
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		SmhdAtomInstance.Offset = offset
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		SmhdAtomInstance.IsFullBox = false
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -47,54 +51,28 @@ func trakRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	}
 	
 	sizeInt := util.Bytes2Int(size)	
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].Size = sizeInt
-	
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		SmhdAtomInstance.Size = sizeInt
+		
+		
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
 	
-	buf, err := fp.Mp4Read(8)
+	buf, err := fp.Mp4Read(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		SmhdAtomInstance.Size)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
 	
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].AllBytes = buf
-	
-	var pos int64
-	
-	err = fp.Mp4Seek(8 + offset, 0)
-	if err != nil {
-		log.Fatalln(err.Error())
-		return err
-	}
-	
-	for fs.MoovAtomInstance.TrakAtomInstance[trakNum].Size > pos {
-		size, atom, err := fp.Mp4ReadHeader()
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		SmhdAtomInstance.AllBytes = buf
 		
-		log.Println(size, string(atom))
 		
-		if err != nil {
-			log.Fatalln(err.Error())
-			return err
-		}
-		
-		sizeInt := util.Bytes2Int(size)	
-
-		pos += sizeInt
-	
-		if f, ok := mp4TrakAtoms[string(atom)]; ok {
-			err = f(fs, fp, pos + 8 + offset - sizeInt)
-			if err != nil {
-				log.Fatalln(err.Error())
-				return err	
-			}
-		}
-		
-		fs.nextAtom(pos + 8 + offset, fp)	
-	}
-	
 	return nil
+	
+	
 }
