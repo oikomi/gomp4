@@ -67,6 +67,12 @@ func mvhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	
 	fs.MoovAtomInstance.MvhdAtomInstance.AllBytes = buf
 	
+	err = fp.Mp4Seek(offset + 8, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}	
+	
 	size, err = fp.Mp4Read(1)
 	if err != nil {
 		log.Fatalln(err.Error())

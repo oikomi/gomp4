@@ -35,8 +35,10 @@ type HdlrAtom struct {
 
 func hdlrRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	var err error
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.Offset = offset
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.IsFullBox = false
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.
+		Offset = offset
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.
+		IsFullBox = false
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -50,7 +52,8 @@ func hdlrRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	}
 	
 	sizeInt := util.Bytes2Int(size)	
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.Size = sizeInt
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.
+		Size = sizeInt
 	
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
@@ -58,49 +61,61 @@ func hdlrRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		return err
 	}
 	
-	buf, err := fp.Mp4Read(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.Size)
+	buf, err := fp.Mp4Read(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+		HdlrAtomInstance.Size)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
 	
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.AllBytes = buf
-	
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.
+		AllBytes = buf
+
+	err = fp.Mp4Seek(offset + 8, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}	
 	
 	size, err = fp.Mp4Read(1)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.Version = uint8(size[0])
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.
+		Version = uint8(size[0])
 	
 	size, err = fp.Mp4Read(3)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.Flag = util.Byte32Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.
+		Flag = util.Byte32Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.ComponentType = util.Byte42Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.
+		ComponentType = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.ComponentSubType = util.Byte42Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.
+		ComponentSubType = util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.ComponentManufacturer = util.Byte42Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.HdlrAtomInstance.
+		ComponentManufacturer = util.Byte42Uint32(size, 0)
 	
 	return nil
 }

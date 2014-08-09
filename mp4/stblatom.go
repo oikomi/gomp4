@@ -27,11 +27,11 @@ type StblAtom struct {
 	IsFullBox bool
 	
 	StsdAtomAtomInstance StsdAtom
-	SttsAtomAtomInstance StsdAtom
-	StssAtomAtomInstance StsdAtom
-	StscAtomAtomInstance StsdAtom
-	StszAtomAtomInstance StsdAtom
-	StcoAtomAtomInstance StsdAtom
+	SttsAtomAtomInstance SttsAtom
+	StssAtomAtomInstance StssAtom
+	StscAtomAtomInstance StscAtom
+	StszAtomAtomInstance StszAtom
+	StcoAtomAtomInstance StcoAtom
 
 	AllBytes []byte
 }
@@ -84,9 +84,9 @@ func stblRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		if f, ok := mp4StblAtoms[string(atom)]; ok {
 			err = f(fs, fp, pos + 8 + offset - sizeInt)
 			
-			if string(atom) == "trak" {
-				trakNum ++
-			}
+			//if string(atom) == "trak" {
+				//trakNum ++
+			//}
 			
 			if err != nil {
 				log.Fatalln(err.Error())

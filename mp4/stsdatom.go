@@ -25,6 +25,9 @@ type StsdAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
+	Version uint8
+	Flag uint32
+	EntriesNum uint32
 
 	AllBytes []byte
 }
@@ -66,6 +69,12 @@ func stsdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 		StblAtomInstance.StsdAtomAtomInstance.AllBytes = buf
+		
+	err = fp.Mp4Seek(offset + 8, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}	
 		
 		
 	return nil

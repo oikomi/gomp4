@@ -36,8 +36,10 @@ type MinfAtom struct {
 func minfRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	log.Println("minfRead")
 	var err error
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.Offset = offset
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.IsFullBox = false
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		Offset = offset
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		IsFullBox = false
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -51,7 +53,8 @@ func minfRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	}
 	
 	sizeInt := util.Bytes2Int(size)	
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.Size = sizeInt
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		Size = sizeInt
 	
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
@@ -65,7 +68,8 @@ func minfRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		return err
 	}
 	
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.AllBytes = buf	
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		AllBytes = buf	
 	
 	var pos int64
 	
@@ -75,7 +79,8 @@ func minfRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		return err
 	}
 	
-	for fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.Size > pos {
+	for fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		Size > pos {
 		size, atom, err := fp.Mp4ReadHeader()
 		
 		//log.Println(size, string(atom))
@@ -92,9 +97,9 @@ func minfRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		if f, ok := mp4MinfAtoms[string(atom)]; ok {
 			err = f(fs, fp, pos + 8 + offset - sizeInt)
 			
-			if string(atom) == "trak" {
-				trakNum ++
-			}
+			//if string(atom) == "trak" {
+			//	trakNum ++
+			//}
 			
 			if err != nil {
 				log.Fatalln(err.Error())

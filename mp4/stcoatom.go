@@ -25,6 +25,12 @@ type StcoAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
+	
+	Version uint8
+	Flag uint32
+	EntriesNum uint32
+	
+	ChunkSizeTable []uint32
 
 	AllBytes []byte
 }
@@ -57,8 +63,8 @@ func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		return err
 	}
 	
-	buf, err := fp.Mp4Read(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StcoAtomAtomInstance.Size)
+	buf, err := fp.Mp4Read(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+		MinfAtomInstance.StblAtomInstance.StcoAtomAtomInstance.Size)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
@@ -66,8 +72,55 @@ func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 		StblAtomInstance.StcoAtomAtomInstance.AllBytes = buf
+
+	err = fp.Mp4Seek(offset + 8, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}	
+			
+	size, err = fp.Mp4Read(1)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		StblAtomInstance.StcoAtomAtomInstance.Version = uint8(size[0])
+	
+	size, err = fp.Mp4Read(3)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		StblAtomInstance.StcoAtomAtomInstance.Flag = util.Byte32Uint32(size, 0)	
+
+	size, err = fp.Mp4Read(4)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		StblAtomInstance.StcoAtomAtomInstance.EntriesNum = util.Byte42Uint32(size, 0)
+	
+	//log.Println(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		//StblAtomInstance.StcoAtomAtomInstance.EntriesNum)	
+	var i uint32
+	for i = 0; i < fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		StblAtomInstance.StcoAtomAtomInstance.EntriesNum; i++ {	
 		
+		buf, err := fp.Mp4Read(4)
+		if err != nil {
+			log.Fatalln(err.Error())
+			return err
+		}
+		//fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+			//StblAtomInstance.StcoAtomAtomInstance.ChunkSizeTable[i] = util.Byte42Uint32(buf, 0)
+		fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+			StblAtomInstance.StcoAtomAtomInstance.ChunkSizeTable = append(fs.MoovAtomInstance.
+			TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.StblAtomInstance.
+			StcoAtomAtomInstance.ChunkSizeTable, util.Byte42Uint32(buf, 0))
+	}
 		
 	return nil
-	
 }

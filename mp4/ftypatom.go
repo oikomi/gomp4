@@ -64,6 +64,7 @@ func ftypRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	
 	fs.FtypAtomInstance.Offset = offset
 	fs.FtypAtomInstance.IsFullBox = false
+	
 	err = fp.Mp4Seek(offset + 8, 0)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -78,7 +79,7 @@ func ftypRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	//fs.FtypAtomInstance.MajorBrand = string(buf)
 	fs.FtypAtomInstance.MajorBrand = buf
 	
-	log.Println(fs.FtypAtomInstance.MajorBrand)
+	//log.Println(fs.FtypAtomInstance.MajorBrand)
 	
 	err = fp.Mp4Seek(12, 0)
 	if err != nil {

@@ -89,9 +89,9 @@ func mdiaRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		if f, ok := mp4MdiaAtoms[string(atom)]; ok {
 			err = f(fs, fp, pos + 8 + offset - sizeInt)
 			
-			if string(atom) == "trak" {
-				trakNum ++
-			}
+			//if string(atom) == "trak" {
+			//	trakNum ++
+			//}
 			
 			if err != nil {
 				log.Fatalln(err.Error())

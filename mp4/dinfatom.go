@@ -25,9 +25,6 @@ type DinfAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
-	Version uint8
-	Flag uint32
-	EntryCount uint32
 
 	AllBytes []byte
 }
@@ -69,8 +66,6 @@ func dinfRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 		DinfAtomInstance.AllBytes = buf
-		
-		
+			
 	return nil
-	
 }
