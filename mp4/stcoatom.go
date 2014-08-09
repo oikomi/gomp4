@@ -103,8 +103,6 @@ func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 		StblAtomInstance.StcoAtomAtomInstance.EntriesNum = util.Byte42Uint32(size, 0)
 	
-	//log.Println(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		//StblAtomInstance.StcoAtomAtomInstance.EntriesNum)	
 	var i uint32
 	for i = 0; i < fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 		StblAtomInstance.StcoAtomAtomInstance.EntriesNum; i++ {	
@@ -114,8 +112,7 @@ func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 			log.Fatalln(err.Error())
 			return err
 		}
-		//fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-			//StblAtomInstance.StcoAtomAtomInstance.ChunkSizeTable[i] = util.Byte42Uint32(buf, 0)
+			
 		fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 			StblAtomInstance.StcoAtomAtomInstance.ChunkSizeTable = append(fs.MoovAtomInstance.
 			TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.StblAtomInstance.
