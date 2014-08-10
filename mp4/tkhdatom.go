@@ -88,77 +88,88 @@ func tkhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Flag = util.Byte32Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Flag = 
+		util.Byte32Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.CreationTime = util.Byte42Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.CreationTime = 
+		util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.ModificationTime = util.Byte42Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.ModificationTime = 
+		util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrakID = util.Byte42Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrakID = 
+		util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved1 = util.Byte42Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved1 = 
+		util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Duration = util.Byte42Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Duration = 
+		util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(8)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	//fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved2 = util.Byte82Uint32(size, 0)
+	//fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved2 = 
+		//util.Byte82Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(2)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Layer = util.Byte22Uint16(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Layer = 
+		util.Byte22Uint16(size, 0)
 	
 	size, err = fp.Mp4Read(2)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.AlternateGroup = util.Bytes2Int(size)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.AlternateGroup = 
+		util.Bytes2Int(size)
 	
 	size, err = fp.Mp4Read(2)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Volume = util.Byte22Uint16(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Volume = 
+		util.Byte22Uint16(size, 0)
 	
 	size, err = fp.Mp4Read(2)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved3 = util.Byte22Uint16(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.Reserved3 = 
+		util.Byte22Uint16(size, 0)
 	
 	size, err = fp.Mp4Read(36)
 	if err != nil {
@@ -172,14 +183,16 @@ func tkhdRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrackWidth = util.Byte42Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrackWidth = 
+		util.Byte42Uint32(size, 0)
 	
 	size, err = fp.Mp4Read(4)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrackHeight = util.Byte42Uint32(size, 0)
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].TkhdAtomInstance.TrackHeight = 
+		util.Byte42Uint32(size, 0)
 	
 	return nil
 }

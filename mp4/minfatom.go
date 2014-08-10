@@ -34,7 +34,7 @@ type MinfAtom struct {
 }
 
 func minfRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
-	log.Println("minfRead")
+	//log.Println("minfRead")
 	var err error
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 		Offset = offset

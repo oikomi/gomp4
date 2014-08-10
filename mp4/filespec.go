@@ -99,7 +99,7 @@ func (self *Mp4FileSpec) ParseAtoms(fp *Mp4FilePro) error {
 	for self.TotalSize > pos {
 		size, atom, err := fp.Mp4ReadHeader()
 		
-		log.Println(size, string(atom))
+		//log.Println(size, string(atom))
 		
 		if err != nil {
 			log.Fatalln(err.Error())

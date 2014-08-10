@@ -74,7 +74,7 @@ func trakRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	for fs.MoovAtomInstance.TrakAtomInstance[trakNum].Size > pos {
 		size, atom, err := fp.Mp4ReadHeader()
 		
-		log.Println(size, string(atom))
+		//log.Println(size, string(atom))
 		
 		if err != nil {
 			log.Fatalln(err.Error())

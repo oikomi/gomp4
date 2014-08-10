@@ -35,7 +35,54 @@ func (self * SegMp4Header) MoovCover(fs *Mp4FileSpec)   {
 	log.Println(self.Moov)
 }
 
-func WriteSegMp4(fs *Mp4FileSpec) error {
+func parsepara(fs *Mp4FileSpec, start uint64, end uint64 , trakNum int) {
+	timeScale := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+		MdhdAtomInstance.Timescale
+	entriesNum := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+		MinfAtomInstance.StblAtomInstance.SttsAtomAtomInstance.EntriesNum
+	log.Println(timeScale)
+	startTime := (uint64)(timeScale) * start
+	endTime := (uint64)(timeScale) * end
+	log.Println(startTime)
+	log.Println(endTime)
+	var startSample uint64
+	var endSample uint64
+	var i uint32
+	for i = 0; i < entriesNum; i++ {
+		count := fs.MoovAtomInstance.TrakAtomInstance[i].MdiaAtomInstance.
+			MinfAtomInstance.StblAtomInstance.SttsAtomAtomInstance.SampleCountDurationTable[i][0]
+		duration := fs.MoovAtomInstance.TrakAtomInstance[i].MdiaAtomInstance.
+			MinfAtomInstance.StblAtomInstance.SttsAtomAtomInstance.SampleCountDurationTable[i][1]
+		
+		if (startTime < (uint64) (count) * (uint64) (duration)) {
+            startSample += (startTime / (uint64)(duration))
+			log.Println(startSample)
+			break
+	    }
+		
+		startSample += (uint64)(count)
+        startTime -= (uint64)(count) * (uint64)(duration)
+	}
+	
+	for i = 0; i < entriesNum; i++ {
+		count := fs.MoovAtomInstance.TrakAtomInstance[i].MdiaAtomInstance.
+			MinfAtomInstance.StblAtomInstance.SttsAtomAtomInstance.SampleCountDurationTable[i][0]
+		duration := fs.MoovAtomInstance.TrakAtomInstance[i].MdiaAtomInstance.
+			MinfAtomInstance.StblAtomInstance.SttsAtomAtomInstance.SampleCountDurationTable[i][1]
+		
+		if (endTime < (uint64) (count) * (uint64) (duration)) {
+            endSample += (endTime / (uint64)(duration))
+			log.Println(endSample)
+			break
+	    }
+		
+		endSample += (uint64)(count)
+        endTime -= (uint64)(count) * (uint64)(duration)
+	}
+	
+}
+
+func WriteSegMp4(fs *Mp4FileSpec, start uint64, end uint64) error {
 	segMp4File := "seg.mp4"
     fout, err := os.Create(segMp4File)
 	defer fout.Close()
@@ -45,6 +92,8 @@ func WriteSegMp4(fs *Mp4FileSpec) error {
     }
 	fout.Write(fs.FtypAtomInstance.AllBytes)
 	fout.Write(fs.MoovAtomInstance.AllBytes)
+	
+	parsepara(fs, start, end, 0)
 	
 	return nil
 

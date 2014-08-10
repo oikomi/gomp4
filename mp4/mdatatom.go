@@ -27,7 +27,7 @@ type MdatAtom struct {
 }
 
 func mdatRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
-	log.Println("mdatRead")
+	//log.Println("mdatRead")
 	fs.MdatAtomInstance.Offset = offset
 	var err error	
 
