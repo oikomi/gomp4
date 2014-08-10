@@ -1,6 +1,6 @@
 # gomp4
 
-a lib for mp4 parse writen in golang
+a lib for mp4 parse written in Go(lang)
 
 
 Status
@@ -16,7 +16,7 @@ Build and Install
 	go get github.com/oikomi/gomp4
     make
 	
-Use
+Usage
 =====
 	gomp4 mp4filename
 
