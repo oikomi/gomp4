@@ -118,8 +118,6 @@ func stssRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 			TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.StblAtomInstance.
 			StssAtomAtomInstance.SyncSampleTable, util.Byte42Uint32(buf, 0))
 	}
-		
-		
+			
 	return nil
-	
 }
