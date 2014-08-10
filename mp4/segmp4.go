@@ -35,7 +35,7 @@ func (self * SegMp4Header) MoovCover(fs *Mp4FileSpec)   {
 	log.Println(self.Moov)
 }
 
-func parsepara(fs *Mp4FileSpec, start uint64, end uint64 , trakNum int) {
+func parsePara(fs *Mp4FileSpec, start uint64, end uint64 , trakNum int) {
 	timeScale := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 		MdhdAtomInstance.Timescale
 	entriesNum := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
@@ -55,13 +55,13 @@ func parsepara(fs *Mp4FileSpec, start uint64, end uint64 , trakNum int) {
 			MinfAtomInstance.StblAtomInstance.SttsAtomAtomInstance.SampleCountDurationTable[i][1]
 		
 		if (startTime < (uint64) (count) * (uint64) (duration)) {
-            startSample += (startTime / (uint64)(duration))
+			startSample += (startTime / (uint64)(duration))
 			log.Println(startSample)
 			break
 	    }
 		
 		startSample += (uint64)(count)
-        startTime -= (uint64)(count) * (uint64)(duration)
+		startTime -= (uint64)(count) * (uint64)(duration)
 	}
 	
 	for i = 0; i < entriesNum; i++ {
@@ -71,20 +71,20 @@ func parsepara(fs *Mp4FileSpec, start uint64, end uint64 , trakNum int) {
 			MinfAtomInstance.StblAtomInstance.SttsAtomAtomInstance.SampleCountDurationTable[i][1]
 		
 		if (endTime < (uint64) (count) * (uint64) (duration)) {
-            endSample += (endTime / (uint64)(duration))
+			endSample += (endTime / (uint64)(duration))
 			log.Println(endSample)
 			break
 	    }
 		
 		endSample += (uint64)(count)
-        endTime -= (uint64)(count) * (uint64)(duration)
+		endTime -= (uint64)(count) * (uint64)(duration)
 	}
 	
 }
 
 func WriteSegMp4(fs *Mp4FileSpec, start uint64, end uint64) error {
 	segMp4File := "seg.mp4"
-    fout, err := os.Create(segMp4File)
+	fout, err := os.Create(segMp4File)
 	defer fout.Close()
     if err != nil {
         log.Fatalln(err.Error())
@@ -92,8 +92,9 @@ func WriteSegMp4(fs *Mp4FileSpec, start uint64, end uint64) error {
     }
 	fout.Write(fs.FtypAtomInstance.AllBytes)
 	fout.Write(fs.MoovAtomInstance.AllBytes)
+	fout.Write(fs.MoovAtomInstance.MvhdAtomInstance.AllBytes)
 	
-	parsepara(fs, start, end, 0)
+	parsePara(fs, start, end, 0)
 	
 	return nil
 
