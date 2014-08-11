@@ -54,7 +54,7 @@ func init() {
 		"minf" : minfRead,
 	}
 	mp4MinfAtoms = map[string]ParseAtomFuc {
-		"smhd" : smhdRead,
+		"vmhd" : vmhdRead,
 		"dinf" : dinfRead,
 		"stbl" : stblRead,
 	}

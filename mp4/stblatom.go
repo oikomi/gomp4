@@ -58,6 +58,21 @@ func stblRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 		StblAtomInstance.Size = sizeInt
 		
+	err = fp.Mp4Seek(offset, 0)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	buf, err := fp.Mp4Read(8)
+	if err != nil {
+		log.Fatalln(err.Error())
+		return err
+	}
+	
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		StblAtomInstance.AllBytes = buf
+		
 	var pos int64
 	
 	err = fp.Mp4Seek(8 + offset, 0)
