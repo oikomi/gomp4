@@ -21,13 +21,58 @@ import (
 	"github.com/oikomi/gomp4/util"
 )
 
+type SegStblAtom struct {
+	Header []byte
+	Stsd []byte
+	Stts []byte
+	Ctts []byte
+	Stsc []byte
+	Stsz []byte
+	Stco []byte
+}
+	
+	
+type SegDinfAtom struct {
+	Header []byte
+}
+
+type SegMinfAtom struct {
+	Header []byte
+	Vmhd []byte
+	Dinf SegDinfAtom
+	Stbl SegStblAtom
+}
+
+type SegMdiaAtom struct {
+	Header []byte
+	Mdhd []byte
+	Hdlr []byte
+	Minf SegMinfAtom
+}
+
+type SegTrakAtom struct {
+	Header []byte
+	Tkhd []byte
+	Mdia SegMdiaAtom
+}
+
+type SegMoovAtom struct {
+	Header []byte
+	Mvhd []byte
+	Trak [2]SegTrakAtom
+}
+
 type SegMp4Header struct {
+	start uint32
+	end uint32
 	startSample uint32
 	endSample uint32
 	Ftyp []byte
-	Moov []byte
-	Mvhd []byte
+	Moov SegMoovAtom
+
 }
+
+
 
 func NewSegMp4Header() *SegMp4Header {
 	return &SegMp4Header{
@@ -35,16 +80,24 @@ func NewSegMp4Header() *SegMp4Header {
 	}
 }
 
-func (self * SegMp4Header) Cover(fs *Mp4FileSpec)   {
+func (self * SegMp4Header) Cover(fs *Mp4FileSpec, trakNum int)   {
 	self.Ftyp = fs.FtypAtomInstance.AllBytes
 	//log.Println(self.Ftyp)
-	self.Moov = fs.MoovAtomInstance.AllBytes
+	self.Moov.Header = fs.MoovAtomInstance.AllBytes
+	self.Moov.Trak[trakNum].Header = fs.MoovAtomInstance.
+		TrakAtomInstance[trakNum].AllBytes
+	self.Moov.Trak[trakNum].Mdia.Header = fs.MoovAtomInstance.
+		TrakAtomInstance[trakNum].MdiaAtomInstance.AllBytes
+	self.Moov.Trak[trakNum].Mdia.Mdhd = fs.MoovAtomInstance.
+		TrakAtomInstance[trakNum].MdiaAtomInstance.MdhdAtomInstance.AllBytes
 	//self.Mvhd = 
 	//log.Println(self.Moov)
 }
 
 
 func (self * SegMp4Header)parsePara(fs *Mp4FileSpec, start uint32, end uint32 , trakNum int) {
+	self.start = start
+	self.end = end
 	timeScale := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 		MdhdAtomInstance.Timescale
 	entriesNum := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
@@ -89,19 +142,43 @@ func (self * SegMp4Header)parsePara(fs *Mp4FileSpec, start uint32, end uint32 , 
 	
 }
 
+func (self * SegMp4Header)updateMdhd(fs *Mp4FileSpec, trakNum int) {
+	self.Moov.Trak[trakNum].Mdia.Mdhd = fs.MoovAtomInstance.TrakAtomInstance[trakNum].
+		MdiaAtomInstance.MdhdAtomInstance.AllBytes
+	//timeScale := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+		//MdhdAtomInstance.Timescale
+	timeScale := fs.MoovAtomInstance.TrakAtomInstance[trakNum].
+		MdiaAtomInstance.MdhdAtomInstance.Timescale
+	copy(self.Moov.Trak[trakNum].Mdia.Mdhd[24:28], 
+		util.Uint32ToBytes((self.end - self.start) * timeScale))
+}
+
+func (self * SegMp4Header)updateTkhd(fs *Mp4FileSpec, trakNum int) {
+	self.Moov.Trak[trakNum].Tkhd = fs.MoovAtomInstance.TrakAtomInstance[trakNum].
+		TkhdAtomInstance.AllBytes
+	//timeScale := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+		//MdhdAtomInstance.Timescale
+	timeScale := fs.MoovAtomInstance.MvhdAtomInstance.Timescale
+	copy(self.Moov.Trak[trakNum].Tkhd[28:32], 
+		util.Uint32ToBytes((self.end - self.start) * timeScale))
+}
+
 func (self * SegMp4Header)updateMvhd(fs *Mp4FileSpec, trakNum int) {
-	self.Mvhd = fs.MoovAtomInstance.MvhdAtomInstance.AllBytes
+	self.Moov.Mvhd = fs.MoovAtomInstance.MvhdAtomInstance.AllBytes
 	//log.Printf()
-	timeScale := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
-		MdhdAtomInstance.Timescale
+	//timeScale := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+		//MdhdAtomInstance.Timescale
+	timeScale := fs.MoovAtomInstance.MvhdAtomInstance.Timescale
 	log.Println((self.endSample - self.startSample) * timeScale)
-	log.Println(self.Mvhd[24:28])
-	copy(self.Mvhd[24:28], util.Uint32ToBytes((self.endSample - self.startSample) * 
+	log.Println(self.Moov.Mvhd[24:28])
+	copy(self.Moov.Mvhd[24:28], util.Uint32ToBytes((self.end - self.start) * 
 		timeScale))
 }
 
 func (self * SegMp4Header)updateAtom(fs *Mp4FileSpec, trakNum int) {
 	self.updateMvhd(fs, trakNum)
+	self.updateTkhd(fs, trakNum)
+	self.updateMdhd(fs, trakNum)
 }
 
 func (self * SegMp4Header)WriteSegMp4(fs *Mp4FileSpec, start uint32, end uint32) error {
@@ -115,13 +192,17 @@ func (self * SegMp4Header)WriteSegMp4(fs *Mp4FileSpec, start uint32, end uint32)
 
 	self.parsePara(fs, start, end, 0)
 	
-	self.Cover(fs)
+	self.Cover(fs, 0)
 	
 	self.updateAtom(fs, 0)
 	
 	fout.Write(self.Ftyp)
-	fout.Write(self.Moov)
-	fout.Write(self.Mvhd)
+	fout.Write(self.Moov.Header)
+	fout.Write(self.Moov.Mvhd)
+	fout.Write(self.Moov.Trak[0].Header)
+	fout.Write(self.Moov.Trak[0].Tkhd)
+	fout.Write(self.Moov.Trak[0].Mdia.Header)
+	fout.Write(self.Moov.Trak[0].Mdia.Mdhd)
 	
 	return nil
 
