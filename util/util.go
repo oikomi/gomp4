@@ -16,7 +16,7 @@
 package util
 
 import (
-	//"encoding/binary"
+	"encoding/binary"
 	"encoding/hex"
 	//"fmt"
 	"strconv"
@@ -26,6 +26,11 @@ const (
 	BigEndian = 0
 )
 
+func Uint32ToBytes(i uint32) []byte {
+	var buf = make([]byte, 4)
+	binary.BigEndian.PutUint32(buf, i)
+	return buf
+}
 
 func Byte42Uint32(data []byte, endian int) uint32 {
 	var i uint32

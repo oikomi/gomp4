@@ -79,5 +79,4 @@ func main() {
 		return
 	}
 	fmt.Println(string(res))
-	mp4.WriteSegMp4(fs)
 }

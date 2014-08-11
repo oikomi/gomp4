@@ -18,35 +18,42 @@ package mp4
 import (
 	"log"
 	"os"
+	"github.com/oikomi/gomp4/util"
 )
 
 type SegMp4Header struct {
+	startSample uint32
+	endSample uint32
 	Ftyp []byte
 	Moov []byte
+	Mvhd []byte
 }
 
-func (self * SegMp4Header) FtypCover(fs *Mp4FileSpec)   {
+func NewSegMp4Header() *SegMp4Header {
+	return &SegMp4Header{
+		
+	}
+}
+
+func (self * SegMp4Header) Cover(fs *Mp4FileSpec)   {
 	self.Ftyp = fs.FtypAtomInstance.AllBytes
-	log.Println(self.Ftyp)
-}
-
-func (self * SegMp4Header) MoovCover(fs *Mp4FileSpec)   {
+	//log.Println(self.Ftyp)
 	self.Moov = fs.MoovAtomInstance.AllBytes
-	log.Println(self.Moov)
+	//self.Mvhd = 
+	//log.Println(self.Moov)
 }
 
-func parsePara(fs *Mp4FileSpec, start uint64, end uint64 , trakNum int) {
+
+func (self * SegMp4Header)parsePara(fs *Mp4FileSpec, start uint32, end uint32 , trakNum int) {
 	timeScale := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 		MdhdAtomInstance.Timescale
 	entriesNum := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 		MinfAtomInstance.StblAtomInstance.SttsAtomAtomInstance.EntriesNum
 	log.Println(timeScale)
-	startTime := (uint64)(timeScale) * start
-	endTime := (uint64)(timeScale) * end
+	startTime := timeScale * start
+	endTime := timeScale * end
 	log.Println(startTime)
 	log.Println(endTime)
-	var startSample uint64
-	var endSample uint64
 	var i uint32
 	for i = 0; i < entriesNum; i++ {
 		count := fs.MoovAtomInstance.TrakAtomInstance[i].MdiaAtomInstance.
@@ -54,14 +61,14 @@ func parsePara(fs *Mp4FileSpec, start uint64, end uint64 , trakNum int) {
 		duration := fs.MoovAtomInstance.TrakAtomInstance[i].MdiaAtomInstance.
 			MinfAtomInstance.StblAtomInstance.SttsAtomAtomInstance.SampleCountDurationTable[i][1]
 		
-		if (startTime < (uint64) (count) * (uint64) (duration)) {
-			startSample += (startTime / (uint64)(duration))
-			log.Println(startSample)
+		if (startTime < count * duration) {
+			self.startSample += (startTime / duration)
+			log.Println(self.startSample)
 			break
-	    }
+		}
 		
-		startSample += (uint64)(count)
-		startTime -= (uint64)(count) * (uint64)(duration)
+		self.startSample += count
+		startTime -= count * duration
 	}
 	
 	for i = 0; i < entriesNum; i++ {
@@ -70,31 +77,51 @@ func parsePara(fs *Mp4FileSpec, start uint64, end uint64 , trakNum int) {
 		duration := fs.MoovAtomInstance.TrakAtomInstance[i].MdiaAtomInstance.
 			MinfAtomInstance.StblAtomInstance.SttsAtomAtomInstance.SampleCountDurationTable[i][1]
 		
-		if (endTime < (uint64) (count) * (uint64) (duration)) {
-			endSample += (endTime / (uint64)(duration))
-			log.Println(endSample)
+		if (endTime < count * duration) {
+			self.endSample += (endTime / duration)
+			log.Println(self.endSample)
 			break
-	    }
+		}
 		
-		endSample += (uint64)(count)
-		endTime -= (uint64)(count) * (uint64)(duration)
+		self.endSample += count
+		endTime -= count * duration
 	}
 	
 }
 
-func WriteSegMp4(fs *Mp4FileSpec, start uint64, end uint64) error {
+func (self * SegMp4Header)updateMvhd(fs *Mp4FileSpec, trakNum int) {
+	self.Mvhd = fs.MoovAtomInstance.MvhdAtomInstance.AllBytes
+	//log.Printf()
+	timeScale := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+		MdhdAtomInstance.Timescale
+	log.Println((self.endSample - self.startSample) * timeScale)
+	log.Println(self.Mvhd[24:28])
+	copy(self.Mvhd[24:28], util.Uint32ToBytes((self.endSample - self.startSample) * 
+		timeScale))
+}
+
+func (self * SegMp4Header)updateAtom(fs *Mp4FileSpec, trakNum int) {
+	self.updateMvhd(fs, trakNum)
+}
+
+func (self * SegMp4Header)WriteSegMp4(fs *Mp4FileSpec, start uint32, end uint32) error {
 	segMp4File := "seg.mp4"
 	fout, err := os.Create(segMp4File)
 	defer fout.Close()
-    if err != nil {
-        log.Fatalln(err.Error())
-        return err 
-    }
-	fout.Write(fs.FtypAtomInstance.AllBytes)
-	fout.Write(fs.MoovAtomInstance.AllBytes)
-	fout.Write(fs.MoovAtomInstance.MvhdAtomInstance.AllBytes)
+	if err != nil {
+	    log.Fatalln(err.Error())
+	    return err 
+	}
+
+	self.parsePara(fs, start, end, 0)
 	
-	parsePara(fs, start, end, 0)
+	self.Cover(fs)
+	
+	self.updateAtom(fs, 0)
+	
+	fout.Write(self.Ftyp)
+	fout.Write(self.Moov)
+	fout.Write(self.Mvhd)
 	
 	return nil
 
