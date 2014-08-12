@@ -64,7 +64,8 @@ func init() {
 		"stss" : stssRead,
 		"stsc" : stscRead,
 		"stsz" : stszRead,
-		"stco" : stcoRead,	
+		"stco" : stcoRead,
+		"ctts" : cttsRead,		
 	}
 }
 

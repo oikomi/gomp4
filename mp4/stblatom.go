@@ -32,6 +32,7 @@ type StblAtom struct {
 	StscAtomAtomInstance StscAtom
 	StszAtomAtomInstance StszAtom
 	StcoAtomAtomInstance StcoAtom
+	CttsAtomAtomInstance CttsAtom
 
 	AllBytes []byte
 }

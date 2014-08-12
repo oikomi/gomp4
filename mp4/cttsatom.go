@@ -21,26 +21,26 @@ import (
 	"github.com/oikomi/gomp4/util"
 )
 
-type StssAtom struct {
+type SampleCountOffset []uint32
+
+type CttsAtom struct {
 	Offset int64
 	Size int64
 	IsFullBox bool
 	
-	Version uint8
-	Flag uint32
 	EntriesNum uint32
 	
-	SyncSampleTable []uint32
+	CttsDataTable []SampleCountOffset
 
 	AllBytes []byte
 }
 
-func stssRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
+func cttsRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	var err error
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StssAtomAtomInstance.Offset = offset
+		StblAtomInstance.CttsAtomAtomInstance.Offset = offset
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StssAtomAtomInstance.IsFullBox = false
+		StblAtomInstance.CttsAtomAtomInstance.IsFullBox = false
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -55,10 +55,7 @@ func stssRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	
 	sizeInt := util.Bytes2Int(size)	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StssAtomAtomInstance.Size = sizeInt
-		
-	//log.Println(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		//StblAtomInstance.StssAtomAtomInstance.Size)
+		StblAtomInstance.CttsAtomAtomInstance.Size = sizeInt
 		
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
@@ -67,36 +64,20 @@ func stssRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	}
 	
 	buf, err := fp.Mp4Read(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StssAtomAtomInstance.Size)
+		StblAtomInstance.CttsAtomAtomInstance.Size)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
 	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StssAtomAtomInstance.AllBytes = buf
-		
-	err = fp.Mp4Seek(offset + 8, 0)
+		StblAtomInstance.CttsAtomAtomInstance.AllBytes = buf
+
+	err = fp.Mp4Seek(offset + 12, 0)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}	
-			
-	size, err = fp.Mp4Read(1)
-	if err != nil {
-		log.Fatalln(err.Error())
-		return err
-	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StssAtomAtomInstance.Version = uint8(size[0])
-	
-	size, err = fp.Mp4Read(3)
-	if err != nil {
-		log.Fatalln(err.Error())
-		return err
-	}
-	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StssAtomAtomInstance.Flag = util.Byte32Uint32(size, 0)	
 
 	size, err = fp.Mp4Read(4)
 	if err != nil {
@@ -104,23 +85,36 @@ func stssRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		return err
 	}
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StssAtomAtomInstance.EntriesNum = util.Byte42Uint32(size, 0)
+		StblAtomInstance.CttsAtomAtomInstance.EntriesNum = util.Byte42Uint32(size, 0)
+		
+	//log.Println(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		//StblAtomInstance.CttsAtomAtomInstance.EntriesNum)
+		
+	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		StblAtomInstance.CttsAtomAtomInstance.CttsDataTable = 
+		make([]SampleCountOffset, fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+		StblAtomInstance.CttsAtomAtomInstance.EntriesNum)
 	
 	var i uint32
 	for i = 0; i < fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StssAtomAtomInstance.EntriesNum; i++ {	
+		StblAtomInstance.CttsAtomAtomInstance.EntriesNum; i++ {	
 		
-		buf, err := fp.Mp4Read(4)
+		buf, err := fp.Mp4Read(8)
 		if err != nil {
 			log.Fatalln(err.Error())
 			return err
 		}
 			
 		fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-			StblAtomInstance.StssAtomAtomInstance.SyncSampleTable = append(fs.MoovAtomInstance.
+			StblAtomInstance.CttsAtomAtomInstance.CttsDataTable[i] = append(fs.MoovAtomInstance.
 			TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.StblAtomInstance.
-			StssAtomAtomInstance.SyncSampleTable, util.Byte42Uint32(buf, 0))
+			CttsAtomAtomInstance.CttsDataTable[i], util.Byte42Uint32(buf[0:4], 0))
+		
+		fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
+			StblAtomInstance.CttsAtomAtomInstance.CttsDataTable[i] = append(fs.MoovAtomInstance.
+			TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.StblAtomInstance.
+			CttsAtomAtomInstance.CttsDataTable[i], util.Byte42Uint32(buf[4:8], 0))
 	}
-			
+		
 	return nil
 }
