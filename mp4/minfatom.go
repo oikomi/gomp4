@@ -27,6 +27,7 @@ type MinfAtom struct {
 	Size int64
 	IsFullBox bool
 	VmhdAtomInstance VmhdAtom
+	SmhdAtomInstance SmhdAtom
 	DinfAtomInstance DinfAtom
 	StblAtomInstance StblAtom
 	
