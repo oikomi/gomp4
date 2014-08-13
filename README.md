@@ -1,6 +1,6 @@
 # gomp4
 
-a lib for mp4 parse written in Go(lang)
+a lib for mp4 **parse** and **segmentation** written in Go(lang)
 
 
 Status
