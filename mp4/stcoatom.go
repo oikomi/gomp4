@@ -38,9 +38,9 @@ type StcoAtom struct {
 func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	var err error
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StcoAtomAtomInstance.Offset = offset
+		StblAtomInstance.StcoAtomInstance.Offset = offset
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StcoAtomAtomInstance.IsFullBox = false
+		StblAtomInstance.StcoAtomInstance.IsFullBox = false
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -55,7 +55,7 @@ func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	
 	sizeInt := util.Bytes2Int(size)	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StcoAtomAtomInstance.Size = sizeInt
+		StblAtomInstance.StcoAtomInstance.Size = sizeInt
 		
 	err = fp.Mp4Seek(offset, 0)
 	if err != nil {
@@ -64,14 +64,14 @@ func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 	}
 	
 	buf, err := fp.Mp4Read(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
-		MinfAtomInstance.StblAtomInstance.StcoAtomAtomInstance.Size)
+		MinfAtomInstance.StblAtomInstance.StcoAtomInstance.Size)
 	if err != nil {
 		log.Fatalln(err.Error())
 		return err
 	}
 	
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StcoAtomAtomInstance.AllBytes = buf
+		StblAtomInstance.StcoAtomInstance.AllBytes = buf
 
 	err = fp.Mp4Seek(offset + 8, 0)
 	if err != nil {
@@ -85,7 +85,7 @@ func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		return err
 	}
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StcoAtomAtomInstance.Version = uint8(size[0])
+		StblAtomInstance.StcoAtomInstance.Version = uint8(size[0])
 	
 	size, err = fp.Mp4Read(3)
 	if err != nil {
@@ -93,7 +93,7 @@ func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		return err
 	}
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StcoAtomAtomInstance.Flag = util.Byte32Uint32(size, 0)	
+		StblAtomInstance.StcoAtomInstance.Flag = util.Byte32Uint32(size, 0)	
 
 	size, err = fp.Mp4Read(4)
 	if err != nil {
@@ -101,11 +101,11 @@ func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		return err
 	}
 	fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StcoAtomAtomInstance.EntriesNum = util.Byte42Uint32(size, 0)
+		StblAtomInstance.StcoAtomInstance.EntriesNum = util.Byte42Uint32(size, 0)
 	
 	var i uint32
 	for i = 0; i < fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-		StblAtomInstance.StcoAtomAtomInstance.EntriesNum; i++ {	
+		StblAtomInstance.StcoAtomInstance.EntriesNum; i++ {	
 		
 		buf, err := fp.Mp4Read(4)
 		if err != nil {
@@ -114,9 +114,9 @@ func stcoRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		}
 			
 		fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
-			StblAtomInstance.StcoAtomAtomInstance.ChunkSizeTable = append(fs.MoovAtomInstance.
+			StblAtomInstance.StcoAtomInstance.ChunkSizeTable = append(fs.MoovAtomInstance.
 			TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.StblAtomInstance.
-			StcoAtomAtomInstance.ChunkSizeTable, util.Byte42Uint32(buf, 0))
+			StcoAtomInstance.ChunkSizeTable, util.Byte42Uint32(buf, 0))
 	}
 		
 	return nil

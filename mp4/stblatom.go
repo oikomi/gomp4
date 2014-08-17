@@ -26,13 +26,13 @@ type StblAtom struct {
 	Size int64
 	IsFullBox bool
 	
-	StsdAtomAtomInstance StsdAtom
-	SttsAtomAtomInstance SttsAtom
-	StssAtomAtomInstance StssAtom
-	StscAtomAtomInstance StscAtom
-	StszAtomAtomInstance StszAtom
-	StcoAtomAtomInstance StcoAtom
-	CttsAtomAtomInstance CttsAtom
+	StsdAtomInstance StsdAtom
+	SttsAtomInstance SttsAtom
+	StssAtomInstance StssAtom
+	StscAtomInstance StscAtom
+	StszAtomInstance StszAtom
+	StcoAtomInstance StcoAtom
+	CttsAtomInstance CttsAtom
 
 	AllBytes []byte
 }
