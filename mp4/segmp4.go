@@ -72,7 +72,7 @@ type SegMp4Header struct {
 	syncSampleNum uint32
 	sttsEntryNum uint32
 	cttsSampleCountSegStart uint32
-	cttsSampleCountSegEnd uint32	
+	cttsSampleCountSegEnd uint32
 	stscSegStart uint32
 	stscSegEnd uint32
 	Ftyp []byte
@@ -89,7 +89,6 @@ func NewSegMp4Header() *SegMp4Header {
 
 func (self * SegMp4Header) Cover(fs *Mp4FileSpec, trakNum int)   {
 	self.Ftyp = fs.FtypAtomInstance.AllBytes
-	//log.Println(self.Ftyp)
 	self.Moov.Header = fs.MoovAtomInstance.AllBytes
 	self.Moov.Trak[trakNum].Header = fs.MoovAtomInstance.
 		TrakAtomInstance[trakNum].AllBytes
@@ -123,11 +122,8 @@ func (self * SegMp4Header)parsePara(fs *Mp4FileSpec, start uint32, end uint32 , 
 		MdhdAtomInstance.Timescale
 	entriesNum := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 		MinfAtomInstance.StblAtomInstance.SttsAtomInstance.EntriesNum
-	//log.Println(timeScale)
 	startTime := timeScale * start
 	endTime := timeScale * end
-	//log.Println(startTime)
-	//log.Println(endTime)
 	var i uint32
 	for i = 0; i < entriesNum; i++ {
 		count := fs.MoovAtomInstance.TrakAtomInstance[i].MdiaAtomInstance.
@@ -176,86 +172,101 @@ func (self * SegMp4Header)updateStsz(fs *Mp4FileSpec, trakNum int) {
 	if fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 		MinfAtomInstance.StblAtomInstance.StszAtomInstance.SampleSize == 0 {
 		copy(self.Moov.Trak[trakNum].Mdia.Minf.Stbl.Stsz[0:4], 
-			util.Uint32ToBytes(20 + (self.endSample - self.startSample)*4))	
+			util.Uint32ToBytes(20 + (self.endSample - self.startSample)*4))
 		copy(self.Moov.Trak[trakNum].Mdia.Minf.Stbl.Stsz[16:20], 
-			util.Uint32ToBytes(self.endSample - self.startSample))		
+			util.Uint32ToBytes(self.endSample - self.startSample))
 	}
 	
-	log.Println(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
-		MinfAtomInstance.StblAtomInstance.StszAtomInstance.SampleSizeTable[self.startSample])
+	//log.Println(fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+		//MinfAtomInstance.StblAtomInstance.StszAtomInstance.SampleSizeTable[self.startSample])
 		
 }
 
 func (self * SegMp4Header)updateStsc(fs *Mp4FileSpec, trakNum int) {
 	if fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 		StblAtomInstance.StscAtomInstance.AllBytes == nil {
-		log.Println("trak has not stsc")	
+		log.Println("trak has not stsc")
 		return
 	}
 
 	self.Moov.Trak[trakNum].Mdia.Minf.Stbl.Stsc = fs.MoovAtomInstance.TrakAtomInstance[trakNum].
 		MdiaAtomInstance.MinfAtomInstance.StblAtomInstance.StscAtomInstance.AllBytes
 	entriesNum := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
-		MinfAtomInstance.StblAtomInstance.StscAtomInstance.EntriesNum	
+		MinfAtomInstance.StblAtomInstance.StscAtomInstance.EntriesNum
+		
 	var i uint32
 	var chunkNum uint32
+	var nextChunkNum uint32
 	var sampleNum uint32
-	var pre uint32
+	//var pre uint32
 	var totalChunkNum uint32
 	var offset uint32
-	pre = 0
+	//pre = 0
+	totalChunkNum = 0
+	//log.Println(self.startSample)
 	for i = 0; i < entriesNum; i++ {
 		chunkNum = fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 			MinfAtomInstance.StblAtomInstance.StscAtomInstance.Sample2ChunkTable[i][0]
+		nextChunkNum = fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+			MinfAtomInstance.StblAtomInstance.StscAtomInstance.Sample2ChunkTable[i+1][0]
 		sampleNum = fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 			MinfAtomInstance.StblAtomInstance.StscAtomInstance.Sample2ChunkTable[i][1]
-		
-		totalChunkNum += (chunkNum - pre) * sampleNum
+
+		totalChunkNum += (nextChunkNum - chunkNum) * sampleNum
 		
 		if self.startSample <= totalChunkNum {
-			self.stscSegStart = i
-			offset = i
+			self.stscSegStart = i - 1
+			self.stscSegStart += (totalChunkNum - self.startSample) / sampleNum
+			offset = i - 1 -1
+			log.Println(chunkNum)
+			log.Println(self.stscSegStart)
+			log.Println(totalChunkNum)
 			break
 		}
 		
-		pre = chunkNum
+		//pre = chunkNum
 	}
-	
-	pre = 0
+
+	//pre = 0
 	i = 0
 	totalChunkNum = 0
 	
 	for i = 0; i < entriesNum; i++ {
 		chunkNum = fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 			MinfAtomInstance.StblAtomInstance.StscAtomInstance.Sample2ChunkTable[i][0]
+		nextChunkNum = fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
+			MinfAtomInstance.StblAtomInstance.StscAtomInstance.Sample2ChunkTable[i+1][0]
 		sampleNum = fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 			MinfAtomInstance.StblAtomInstance.StscAtomInstance.Sample2ChunkTable[i][1]
 		
-		totalChunkNum += (chunkNum - pre) * sampleNum
+		totalChunkNum += (nextChunkNum - chunkNum) * sampleNum
 		
 		if self.endSample <= totalChunkNum {
-			self.stscSegEnd = i
+			self.stscSegEnd = i - 1
+			log.Println(chunkNum)
+			self.stscSegEnd += (totalChunkNum - self.endSample) / sampleNum
+			log.Println(totalChunkNum)
 			break
 		}
 		
-		pre = chunkNum
+		//pre = chunkNum
 	}
-	log.Println(offset)
+	//log.Println(offset)
 	
 	for i = self.stscSegStart; i < self.stscSegEnd; i++ {
 		chunkNum = fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
-			MinfAtomInstance.StblAtomInstance.StscAtomInstance.Sample2ChunkTable[i][0]		
-		copy(self.Moov.Trak[trakNum].Mdia.Minf.Stbl.Stsc[16+(i+1)*12:16+(i+1)*12+4], 
-			util.Uint32ToBytes(i - offset))	
+			MinfAtomInstance.StblAtomInstance.StscAtomInstance.Sample2ChunkTable[i][0]
+		copy(self.Moov.Trak[trakNum].Mdia.Minf.Stbl.Stsc[16+i*12:16+i*12+4], 
+			util.Uint32ToBytes(i - offset))
 	}
 	
-	log.Println(self.stscSegStart)
-	log.Println(self.stscSegEnd)
+	//log.Println(self.stscSegStart)
+	//log.Println(self.stscSegEnd)
 	
 	copy(self.Moov.Trak[trakNum].Mdia.Minf.Stbl.Stsc[0:4], 
-		util.Uint32ToBytes(16 + (self.stscSegEnd - self.stscSegStart)*12))	
+		util.Uint32ToBytes(16 + (self.stscSegEnd - self.stscSegStart)*12))
 	copy(self.Moov.Trak[trakNum].Mdia.Minf.Stbl.Stsc[12:16], 
-		util.Uint32ToBytes((self.stscSegEnd - self.stscSegStart)*12))	
+		util.Uint32ToBytes(self.stscSegEnd - self.stscSegStart))
 		
 }
 
@@ -265,9 +276,6 @@ func (self * SegMp4Header)updateCtts(fs *Mp4FileSpec, trakNum int) {
 		log.Println("trak has not ctts")	
 		return
 	}
-	
-	//log.Println(self.startSample)
-	//log.Println(self.endSample)
 
 	self.Moov.Trak[trakNum].Mdia.Minf.Stbl.Ctts = fs.MoovAtomInstance.TrakAtomInstance[trakNum].
 		MdiaAtomInstance.MinfAtomInstance.StblAtomInstance.CttsAtomInstance.AllBytes
@@ -288,7 +296,7 @@ func (self * SegMp4Header)updateCtts(fs *Mp4FileSpec, trakNum int) {
 			fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
 				MinfAtomInstance.StblAtomInstance.CttsAtomInstance.CttsDataTable[i][0] = 
 				count - rest
-			break	
+			break
 		}
 		
 		posSample -= count
@@ -356,7 +364,7 @@ func (self * SegMp4Header)updateStss(fs *Mp4FileSpec, trakNum int) {
 		}
 	}
 	
-	var k uint32	
+	var k uint32
 	k = 0
 	for i = 0; i < entriesNum; i++ {
 		sample := fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.
@@ -455,7 +463,6 @@ func (self * SegMp4Header)updateMvhd(fs *Mp4FileSpec) {
 }
 
 func (self * SegMp4Header)updateAtom(fs *Mp4FileSpec, trakNum int) {
-	//self.updateMvhd(fs, trakNum)
 	self.updateTkhd(fs, trakNum)
 	self.updateMdhd(fs, trakNum)
 	self.updateStss(fs, trakNum)
@@ -504,8 +511,8 @@ func (self * SegMp4Header)WriteSegMp4(fs *Mp4FileSpec, start uint32, end uint32)
 	
 	fout.Write(self.Moov.Trak[0].Mdia.Minf.Stbl.Stsc[0:16])
 	
-	fout.Write(self.Moov.Trak[0].Mdia.Minf.Stbl.Stsc[16+(self.stscSegStart + 1)*12:16+
-		(self.stscSegEnd+1)*12])
+	fout.Write(self.Moov.Trak[0].Mdia.Minf.Stbl.Stsc[16+(self.stscSegStart)*12:16+
+		(self.stscSegEnd)*12])
 	
 	fout.Write(self.Moov.Trak[0].Mdia.Minf.Stbl.Stsz[0:20])
 	

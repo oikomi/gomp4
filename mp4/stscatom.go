@@ -112,8 +112,6 @@ func stscRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 		make([]Sample2Chunk, fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 		StblAtomInstance.StscAtomInstance.EntriesNum)
 		
-	
-		
 	var i uint32
 	for i = 0; i < fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 		StblAtomInstance.StscAtomInstance.EntriesNum; i++ {	
@@ -123,7 +121,6 @@ func stscRead(fs *Mp4FileSpec, fp *Mp4FilePro, offset int64) error {
 			log.Fatalln(err.Error())
 			return err
 		}
-		
 		
 		fs.MoovAtomInstance.TrakAtomInstance[trakNum].MdiaAtomInstance.MinfAtomInstance.
 			StblAtomInstance.StscAtomInstance.Sample2ChunkTable[i] = append(fs.MoovAtomInstance.
